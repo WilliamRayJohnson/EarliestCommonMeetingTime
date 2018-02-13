@@ -78,9 +78,34 @@ int main(int argc, char *argv[]) {
 
 void *find_common_time(void *arg) {
     double time;
-    char *file;
     th_arg_val *input = (th_arg_val *) arg;
     printf("Thread with %lf sees file %s\n", input->search_time, input->time_sets);
+    time = input->search_time;
+
+    FILE *fp;
+    fp = fopen(input->time_sets, "r");
+    int setAmount;
+    fscanf(fp, "%d", &setAmount);
+    fgetc(fp);
+    
+    double d;
+    char c;
+    int i;
+    bool lnTimeFound = false;
+    bool commonTimeFound = false;
+    for (i = 1; i < setAmount; i++) {
+        c = fgetc(fp);
+        if (c != '\n') {
+            ungetc(c, fp);
+            do {
+                fscanf(fp, "%lf", &d);
+                if (d == time)
+                    lnTimeFound = true;
+                fscanf(fp, "%c", &c);
+            } while (c != '\n');
+        }
+    }
+    fclose(fp);
 
     th_ret_val *retVal = (th_ret_val *) malloc(sizeof(th_ret_val));
     retVal->common_time = input->search_time;
