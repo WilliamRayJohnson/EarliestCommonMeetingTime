@@ -16,6 +16,7 @@
 typedef struct Input {
     double search_time;
     char *time_sets;
+    int thread_id;
 } th_arg_val;
 
 typedef struct Output {
@@ -47,6 +48,7 @@ int main(int argc, char *argv[]) {
             th_arg_val *argVal = (th_arg_val *) malloc(sizeof(th_arg_val));
             argVal->search_time = d;
             argVal->time_sets = argv[1];
+            argVal->thread_id = currTh;
             if (pthread_create (tid[currTh], NULL, find_common_time, 
                         (void *) argVal)) {
                 fprintf(stderr, "Error creating thread %d", currTh);
@@ -102,7 +104,7 @@ void *find_common_time(void *arg) {
     int i = 1;
     bool lnTimeFound;
     bool commonTimeFound = true;
-    while (i < setAmount && commonTimeFound){
+    while (i <= setAmount && commonTimeFound){
         lnTimeFound = false;
         c = fgetc(fp);
         if (c != '\n') {
