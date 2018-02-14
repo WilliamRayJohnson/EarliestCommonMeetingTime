@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <float.h>
 
 #define THREAD_CREATION_FAILED -1
 #define THREAD_JOIN_FAILED -2
@@ -40,6 +41,7 @@ int main(int argc, char *argv[]) {
         double d;
         char c;
         int currTh = 0;
+        double earliestCommonTime = DBL_MAX;
         do {
             fscanf(mainFp, "%lf", &d);
             th_arg_val *argVal = (th_arg_val *) malloc(sizeof(th_arg_val));
@@ -53,6 +55,7 @@ int main(int argc, char *argv[]) {
             currTh++;
             fscanf(mainFp, "%c", &c);
         } while(c != '\n');
+        fclose(mainFp);
 
         void **retVal = (void **) malloc(sizeof(void *));
         for (i = 0; i < currTh; i++) {
@@ -62,12 +65,19 @@ int main(int argc, char *argv[]) {
             }
             else {
                 th_ret_val *result = (th_ret_val *) *retVal;
-                printf("The time, %lf, was found to be: i\n", result->common_time);
-
+                if (result->val_found && result->common_time <= earliestCommonTime)
+                    earliestCommonTime = result->common_time;
             }            
         }
-
-        fclose(mainFp);
+        
+        if (earliestCommonTime != DBL_MAX) {
+            printf("The earliest common meeting time for the set %s is %lf\n",
+                    argv[1], earliestCommonTime);
+        }
+        else {
+            printf("There is no earliest common meeting time in the set %s\n",
+                    argv[1]);
+        }
     }
     else {
         printf("Please provide a text file's name as an argument\n");
@@ -79,7 +89,6 @@ int main(int argc, char *argv[]) {
 void *find_common_time(void *arg) {
     double time;
     th_arg_val *input = (th_arg_val *) arg;
-    printf("Thread with %lf sees file %s\n", input->search_time, input->time_sets);
     time = input->search_time;
 
     FILE *fp;
@@ -90,10 +99,11 @@ void *find_common_time(void *arg) {
     
     double d;
     char c;
-    int i;
-    bool lnTimeFound = false;
-    bool commonTimeFound = false;
-    for (i = 1; i < setAmount; i++) {
+    int i = 1;
+    bool lnTimeFound;
+    bool commonTimeFound = true;
+    while (i < setAmount && commonTimeFound){
+        lnTimeFound = false;
         c = fgetc(fp);
         if (c != '\n') {
             ungetc(c, fp);
@@ -104,11 +114,19 @@ void *find_common_time(void *arg) {
                 fscanf(fp, "%c", &c);
             } while (c != '\n');
         }
+        if (lnTimeFound) {
+            commonTimeFound = true;
+        }
+        else {
+            commonTimeFound = false;
+        }
+        i++;
     }
     fclose(fp);
 
     th_ret_val *retVal = (th_ret_val *) malloc(sizeof(th_ret_val));
     retVal->common_time = input->search_time;
+    retVal->val_found = commonTimeFound;
 
     return ((void *) retVal);
 }
