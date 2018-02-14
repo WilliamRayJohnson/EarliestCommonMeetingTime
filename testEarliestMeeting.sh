@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for filename in *.txt; do
+for filename in sets/*.txt; do
     printf "Testing $filename:\n";
     ./earliestMeeting $filename;
     printf "\n";

@@ -72,18 +72,15 @@ int main(int argc, char *argv[]) {
             }            
         }
         
-        if (earliestCommonTime != DBL_MAX) {
+        if (earliestCommonTime != DBL_MAX) 
             printf("The earliest common meeting time for the set %s is %lf\n",
                     argv[1], earliestCommonTime);
-        }
-        else {
+        else 
             printf("There is no earliest common meeting time in the set %s\n",
                     argv[1]);
-        }
     }
-    else {
+    else 
         printf("Please provide a text file's name as an argument\n");
-    }
 
     exit(0);
 }
@@ -116,12 +113,10 @@ void *find_common_time(void *arg) {
                 fscanf(fp, "%c", &c);
             } while (c != '\n');
         }
-        if (lnTimeFound) {
+        if (lnTimeFound) 
             commonTimeFound = true;
-        }
-        else {
+        else 
             commonTimeFound = false;
-        }
         i++;
     }
     fclose(fp);
