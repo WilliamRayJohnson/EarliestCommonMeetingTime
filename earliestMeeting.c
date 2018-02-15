@@ -27,12 +27,10 @@ typedef struct Output {
 void *find_common_time(void *arg);
 
 int main(int argc, char *argv[]) {
-    if(argc==2) {
+    if(argc>=2) {
         int i;
         FILE *mainFp;
         pthread_t *tid[MAX_THREADS];
-        for (i = 0; i < MAX_THREADS; i++)
-            tid[i] = (pthread_t *) malloc(sizeof(pthread_t));
 
         mainFp = fopen(argv[1], "r");
         int setCount;
@@ -49,6 +47,7 @@ int main(int argc, char *argv[]) {
             argVal->search_time = d;
             argVal->time_sets = argv[1];
             argVal->thread_id = currTh;
+            tid[currTh] = (pthread_t *) malloc(sizeof(pthread_t));
             if (pthread_create (tid[currTh], NULL, find_common_time, 
                         (void *) argVal)) {
                 fprintf(stderr, "Error creating thread %d", currTh);
@@ -71,13 +70,11 @@ int main(int argc, char *argv[]) {
                     earliestCommonTime = result->common_time;
             }            
         }
-        
+
         if (earliestCommonTime != DBL_MAX) 
-            printf("The earliest common meeting time for the set %s is %lf\n",
-                    argv[1], earliestCommonTime);
+            printf("%lf\n", earliestCommonTime);
         else 
-            printf("There is no earliest common meeting time in the set %s\n",
-                    argv[1]);
+            printf("No common value exists.\n");
     }
     else 
         printf("Please provide a text file's name as an argument\n");
@@ -95,7 +92,7 @@ void *find_common_time(void *arg) {
     int setAmount;
     fscanf(fp, "%d", &setAmount);
     fgetc(fp);
-    
+
     double d;
     char c;
     int i = 1;
